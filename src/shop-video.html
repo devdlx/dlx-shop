@@ -1,0 +1,480 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/google-youtube/google-youtube.html">
+<link rel="import" href="../bower_components/google-castable-video/google-castable-video.html">
+<link href="../bower_components/paper-video/paper-video.html" rel="import">
+
+<link rel="import" href="shop-button.html">
+<link rel="import" href="shop-category-data.html">
+<link rel="import" href="shop-common-styles.html">
+<link rel="import" href="shop-image.html">
+<link rel="import" href="shop-select.html">
+
+<dom-module id="shop-video">
+
+  <template>
+
+    <style include="shop-common-styles shop-button shop-select">
+
+:host {
+    display: block;
+}
+
+.backdrop {
+    @apply(--layout-fit);
+    background: red;
+    z-index: -9999;
+}
+
+#content {
+    @apply(--layout-horizontal);
+    @apply(--layout-center-justified);
+}
+
+.shop-video-container {
+    position: relative;
+    margin: 0 0 0 24px;
+    width: 60%;
+}
+
+.shop-video-player {
+    width: 100%;
+}
+
+
+
+shop-image::before {
+    content: "";
+    display: block;
+    padding-top: 100%;
+}
+
+.detail {
+    margin: 0 42px;
+    width: 50%;
+    max-width: 404px;
+    transition: opacity 0.4s;
+    opacity: 0;
+}
+
+.detail[has-content] {
+    opacity: 1;
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 28px;
+    margin: 0;
+}
+
+.price {
+    margin: 16px 0 40px;
+    font-size: 16px;
+    color: var(--app-secondary-color);
+}
+
+.description {
+    margin: 0 0 32px 0;
+}
+
+.description > h4 {
+    margin: 16px 0;
+}
+
+.description > p {
+    margin: 0;
+    color: var(--app-secondary-color);
+}
+
+.pickers {
+    @apply(--layout-vertical);
+    border-top: 1px solid #ccc;
+}
+
+shop-select > select {
+    font-size: 16px;
+    padding: 16px 24px 16px 70px;
+}
+
+@media (max-width: 767px) {
+    
+    #content {
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+    }
+    
+    .shop-video-container {
+        margin: 0;
+        width: 100%;
+    }
+    
+    .detail {
+        box-sizing: border-box;
+        margin: 32px 0;
+        padding: 0 24px;
+        width: 100%;
+        max-width: 600px;
+    }
+    
+    h1 {
+        font-size: 20px;
+        line-height: 24px;
+    }
+    
+    .price {
+        font-size: inherit;
+        margin: 12px 0 32px;
+    }
+
+}
+</style>
+
+    <!--
+      app-route provides the name of the category and the item.
+    -->
+    <app-route
+        route="[[route]]"
+        pattern="/:itemName"
+        data="{{routeDataDetail}}"></app-route>
+
+    <!--
+      shop-category-data provides the item data for a given category and item name.
+    -->
+<!--     <shop-category-data
+        id="categoryData"
+        category-name="[[routeData.category]]"
+        item-name="[[routeData.item]]"
+        item="{{item}}"
+        failure="{{failure}}"></shop-category-data> -->
+
+<div class="backdrop">
+{{item.backdrop_path}}
+
+</div>
+
+    <div id="content" hidden$="[[failure]]">
+<!--       <shop-image alt="[[item.title]]" src="[[item.largeImage]]"></shop-image> -->
+        <template is="dom-if" if="{{youtubeId}}">
+        <div class="shop-video-container">
+        <div class="shop-video" >
+            <google-youtube fluid video-id="{{youtubeId}}" height="270px" width="480px" rel="0" start="1" autoplay="1" chromeless></google-youtube>
+        </div></div>
+       </template>
+
+       <div class="shop-video-container">
+            <div class="shop-video">
+<!--                 <video is="google-castable-video" class="shop-video-player" autoplay>
+                    <source src="{{item.link}}" type="video/mp4">
+                </video> -->
+                <paper-video class="shop-video-player" src="[[item.link]]" autoplay></paper-video>
+            </div>
+       </div>
+      <div class="detail" has-content$="[[_isDefined(item)]]">
+        <h1>[[item.title]]</h1>
+        <div class="price">[[item.views]]</div>
+        <shop-image alt="[[item.title]]" src="[[item.poster_path]]"></shop-image> 
+        <div class="pickers" hidden>
+          <shop-select>
+            <label id="sizeLabel" prefix>Size</label>
+            <select id="sizeSelect" aria-labelledby="sizeLabel">
+              <option value="XS">XS</option>
+              <option value="S">S</option>
+              <option value="M" selected>M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+            </select>
+            <shop-md-decorator aria-hidden="true">
+              <shop-underline></shop-underline>
+            </shop-md-decorator>
+          </shop-select>
+          <shop-select>
+            <label id="quantityLabel" prefix>Quantity</label>
+            <select id="quantitySelect" aria-labelledby="quantityLabel">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+            <shop-md-decorator aria-hidden="true">
+              <shop-underline></shop-underline>
+            </shop-md-decorator>
+          </shop-select>
+        </div>
+        <div class="description">
+          <h4>Description</h4>
+          <p id="desc">{{item.description}}</p>
+        </div>
+        <shop-button responsive>
+          <button on-tap="_addToCart" aria-label="Add this item to cart">Add to Cart</button>
+        </shop-button>
+      </div>
+    </div>
+
+    <!--
+      shop-network-warning shows a warning message when the items can't be rendered due
+      to network conditions.
+    -->
+    <shop-network-warning
+        hidden$="[[!failure]]"
+        offline="[[offline]]"
+        on-try-reconnect="_tryReconnect"></shop-network-warning>
+
+  </template>
+
+  <script>
+
+
+
+
+
+
+
+
+
+
+Polymer({
+    
+    is: 'shop-video',
+    
+    properties: {
+        
+        item: Object,
+        
+        route: Object,
+        
+        routeDataDetail: Object,
+        
+        visible: Boolean,
+        
+        offline: {
+            type: Boolean,
+            observer: '_offlineChanged'
+        },
+        youtubeId: {
+            type: String,
+            notify: true,
+            //value: 'AtqaiYlqs7c'
+        },
+        
+        link: {
+            type: String,
+            value: 'https://firebasestorage.googleapis.com/v0/b/project-604055857022237684.appspot.com/o/South.Park.S18E08.Cock.Magic.UNCENSORED.720p.WEB-DL.x264.AAC.mp4?alt=media&token=7e47f4ca-f72c-49b8-b918-b132e7533855'
+        },
+        
+        failure: {
+            type: Boolean,
+            notify: true,
+            value: false
+        },
+    
+    },
+    
+    observers: [
+    '_youtube(youtubeId, route, visible)', 
+    '_link(link, route, visible)', 
+    //'_computeItem(item)'
+    ],
+    
+    
+    _fetchMovieInfo: function(link) {
+        
+        let apikey = "33dce8e62b60a6fc148ed731ff825268";
+        let url = 'https://api.themoviedb.org/3/search/movie?api_key=33dce8e62b60a6fc148ed731ff825268';
+        //link = 'mission impossible 2';
+        let parts = link.split("/");
+        let rawName = parts[parts.length - 1].split('?')[0];
+        let title = rawName.replace(/[^a-zA-Z0-9]/g, ' ');
+        
+        //console.log(title);
+        url += '&query=' + title;
+        
+        url = encodeURI(url);
+        
+        //console.log(url);
+        
+        var request = new XMLHttpRequest();
+        request.open('GET', url);
+        
+        request.setRequestHeader('Accept', 'application/json');
+        that = this;
+        request.onreadystatechange = function() {
+            if (this.readyState === 4) {
+                //console.log('Status:', this.status);
+                //console.log('Headers:', this.getAllResponseHeaders());
+                //console.log('Body:', JSON.parse(this.responseText));
+                item = JSON.parse(this.responseText).results[0];
+                if (!item) {
+                    item = {}
+                    item.title = title;
+                    item.link = link;
+                    item.backdrop_path = 'http://www.much.com/wp-content/uploads/2015/05/featured-south-park1.jpg';
+                    console.log(item);
+                    that.set('item', item);
+                    return;
+                }
+                item.description = item.overview;
+                item.poster_path = 'http://image.tmdb.org/t/p/w500' + item.poster_path;
+                item.backdrop_path = 'http://image.tmdb.org/t/p/w500' + item.backdrop_path;
+
+                item.url = link;
+                console.log(item);
+                
+                //'http://api.themoviedb.org/3/movie/{imdbid}/images?api_key='
+                that.set('item', item);
+            }
+        }
+        ;
+        
+        request.send();
+    
+    },
+    
+    
+    _link: function(link, route, visible) {
+        
+        //console.log(link);
+        
+        if (route.prefix !== '/video') {
+            return;
+        }
+        
+        this._fetchMovieInfo(link);
+        
+        if (visible && this.item) {
+            this.debounce('item-change', function() {
+                // The item description contains escaped HTML (e.g. "&lt;br&gt;"), so we need to
+                // unescape it ("<br>") and set it as innerHTML.
+                var text = this.item ? this.item.description : '';
+                this.$.desc.innerHTML = this._unescapeText(text);
+                
+                // Reset the select menus.
+                this.$.quantitySelect.value = '1';
+                this.$.sizeSelect.value = 'M';
+                
+                this.fire('change-section', {
+                    category: item.category,
+                    title: item.title
+                });
+            });
+        }
+    },
+    
+    
+    
+    _youtube: function(youtubeId, route, visible) {
+        
+        //console.log(youtubeId);
+        
+        if (route.prefix !== '/video') {
+            return;
+        }
+        
+        //this._fetchYoutube(youtubeId, 1);
+        
+        
+        if (visible && this.item) {
+            this.debounce('item-change', function() {
+                // The item description contains escaped HTML (e.g. "&lt;br&gt;"), so we need to
+                // unescape it ("<br>") and set it as innerHTML.
+                var text = this.item ? this.item.description : '';
+                this.$.desc.innerHTML = this._unescapeText(text);
+                
+                // Reset the select menus.
+                this.$.quantitySelect.value = '1';
+                this.$.sizeSelect.value = 'M';
+                
+                this.fire('change-section', {
+                    category: item.category,
+                    title: item.title
+                });
+            });
+        }
+    },
+    
+    _unescapeText: function(text) {
+        var elem = document.createElement('textarea');
+        elem.innerHTML = text;
+        return elem.textContent;
+    },
+    
+    _formatPrice: function(price) {
+        return price ? '$' + price.toFixed(2) : '';
+    },
+    
+    _addToCart: function() {
+        console.log(this.$.quantitySelect);
+        // This event will be handled by shop-app.
+        this.fire('add-cart-item', {
+            item: this.item,
+            quantity: parseInt(this.$.quantitySelect.value, 10),
+            size: this.$.sizeSelect.value
+        });
+    },
+    
+    _isDefined: function(item) {
+        return item != null ;
+    },
+    
+    _tryReconnect: function() {
+        //this.$.categoryData.refresh();
+        console.log(offline);
+    },
+    
+    _offlineChanged: function(offline) {
+        console.log(offline);
+        if (!offline) {
+            //this._tryReconnect();
+            this.failure = false;
+        } else {
+            this.failure = true;
+        }
+    },
+    
+    _fetchYoutube: function(id, attempts) {
+        this.set('failure', false);
+        
+        this._getResource({
+            url: '/data/' + id + '.json',
+            onLoad: function(e) {
+                this.set('item', JSON.parse(e.target.responseText));
+            },
+            onError: function(e) {
+                this._setFailure(true);
+            }
+        }, attempts);
+    },
+    
+    
+    _getResource: function(rq, attempts) {
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener('load', rq.onLoad.bind(this));
+        xhr.addEventListener('error', function(e) {
+            // Flaky connections might fail fetching resources
+            if (attempts > 1) {
+                this.debounce('_getResource', this._getResource.bind(this, rq, attempts - 1), 200);
+            } else {
+                rq.onError.call(this, e);
+            }
+        }
+        .bind(this));
+        xhr.open('GET', rq.url);
+        xhr.send();
+    },
+
+});
+</script>
+
+</dom-module>
