@@ -13,7 +13,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/google-youtube/google-youtube.html">
 <link rel="import" href="../bower_components/google-castable-video/google-castable-video.html">
-<link href="../bower_components/paper-video/paper-video.html" rel="import">
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+
+<link href="dlx/dlx-video.html" rel="import">
 
 <link rel="import" href="shop-button.html">
 <link rel="import" href="shop-category-data.html">
@@ -27,14 +29,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <style include="shop-common-styles shop-button shop-select">
 
+
 :host {
     display: block;
 }
 
 .backdrop {
     @apply(--layout-fit);
-    background: red;
+    top: 64px;
     z-index: -9999;
+}
+
+.backdrop iron-image {
+    @apply(--layout-fit);
+    z-index: -9999;
+}
+.backdrop .screen {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -9999;
+    background: rgba(0, 0, 0, 0.5);
+
 }
 
 #content {
@@ -160,31 +178,25 @@ shop-select > select {
         failure="{{failure}}"></shop-category-data> -->
 
 <div class="backdrop">
-{{item.backdrop_path}}
-
+    <iron-image alt="[[item.title]]" sizing="cover" preload fade src="[[item.backdrop_path]]"></iron-image>
+<!--     <div class="screen" hidden$="[[!item.backdrop_path]]"></div> -->
 </div>
 
     <div id="content" hidden$="[[failure]]">
 <!--       <shop-image alt="[[item.title]]" src="[[item.largeImage]]"></shop-image> -->
-        <template is="dom-if" if="{{youtubeId}}">
-        <div class="shop-video-container">
-        <div class="shop-video" >
-            <google-youtube fluid video-id="{{youtubeId}}" height="270px" width="480px" rel="0" start="1" autoplay="1" chromeless></google-youtube>
-        </div></div>
-       </template>
 
        <div class="shop-video-container">
             <div class="shop-video">
 <!--                 <video is="google-castable-video" class="shop-video-player" autoplay>
                     <source src="{{item.link}}" type="video/mp4">
                 </video> -->
-                <paper-video class="shop-video-player" src="[[item.link]]" autoplay></paper-video>
+                <dlx-video class="shop-video-player" link="[[link]]" autoplay item="{{item}}"></dlx-video>
             </div>
        </div>
       <div class="detail" has-content$="[[_isDefined(item)]]">
         <h1>[[item.title]]</h1>
         <div class="price">[[item.views]]</div>
-        <shop-image alt="[[item.title]]" src="[[item.poster_path]]"></shop-image> 
+        <shop-image alt="[[item.title]]" src="[[item.poster_path]]" hidden$="[[!item.display_image]]"></shop-image> 
         <div class="pickers" hidden>
           <shop-select>
             <label id="sizeLabel" prefix>Size</label>
@@ -217,9 +229,9 @@ shop-select > select {
           <h4>Description</h4>
           <p id="desc">{{item.description}}</p>
         </div>
-        <shop-button responsive>
+<!--         <shop-button responsive>
           <button on-tap="_addToCart" aria-label="Add this item to cart">Add to Cart</button>
-        </shop-button>
+        </shop-button> -->
       </div>
     </div>
 
@@ -235,6 +247,7 @@ shop-select > select {
   </template>
 
   <script>
+
 
 
 
@@ -271,7 +284,6 @@ Polymer({
         
         link: {
             type: String,
-            value: 'https://firebasestorage.googleapis.com/v0/b/project-604055857022237684.appspot.com/o/South.Park.S18E08.Cock.Magic.UNCENSORED.720p.WEB-DL.x264.AAC.mp4?alt=media&token=7e47f4ca-f72c-49b8-b918-b132e7533855'
         },
         
         failure: {
@@ -283,64 +295,9 @@ Polymer({
     },
     
     observers: [
-    '_youtube(youtubeId, route, visible)', 
-    '_link(link, route, visible)', 
-    //'_computeItem(item)'
+    '_link(link, route, visible)'
     ],
     
-    
-    _fetchMovieInfo: function(link) {
-        
-        let apikey = "33dce8e62b60a6fc148ed731ff825268";
-        let url = 'https://api.themoviedb.org/3/search/movie?api_key=33dce8e62b60a6fc148ed731ff825268';
-        //link = 'mission impossible 2';
-        let parts = link.split("/");
-        let rawName = parts[parts.length - 1].split('?')[0];
-        let title = rawName.replace(/[^a-zA-Z0-9]/g, ' ');
-        
-        //console.log(title);
-        url += '&query=' + title;
-        
-        url = encodeURI(url);
-        
-        //console.log(url);
-        
-        var request = new XMLHttpRequest();
-        request.open('GET', url);
-        
-        request.setRequestHeader('Accept', 'application/json');
-        that = this;
-        request.onreadystatechange = function() {
-            if (this.readyState === 4) {
-                //console.log('Status:', this.status);
-                //console.log('Headers:', this.getAllResponseHeaders());
-                //console.log('Body:', JSON.parse(this.responseText));
-                item = JSON.parse(this.responseText).results[0];
-                if (!item) {
-                    item = {}
-                    item.title = title;
-                    item.link = link;
-                    item.backdrop_path = 'http://www.much.com/wp-content/uploads/2015/05/featured-south-park1.jpg';
-                    console.log(item);
-                    that.set('item', item);
-                    return;
-                }
-                item.description = item.overview;
-                item.poster_path = 'http://image.tmdb.org/t/p/w500' + item.poster_path;
-                item.backdrop_path = 'http://image.tmdb.org/t/p/w500' + item.backdrop_path;
-
-                item.url = link;
-                console.log(item);
-                
-                //'http://api.themoviedb.org/3/movie/{imdbid}/images?api_key='
-                that.set('item', item);
-            }
-        }
-        ;
-        
-        request.send();
-    
-    },
     
     
     _link: function(link, route, visible) {
@@ -351,7 +308,9 @@ Polymer({
             return;
         }
         
-        this._fetchMovieInfo(link);
+        
+        
+        
         
         if (visible && this.item) {
             this.debounce('item-change', function() {
@@ -441,37 +400,6 @@ Polymer({
         } else {
             this.failure = true;
         }
-    },
-    
-    _fetchYoutube: function(id, attempts) {
-        this.set('failure', false);
-        
-        this._getResource({
-            url: '/data/' + id + '.json',
-            onLoad: function(e) {
-                this.set('item', JSON.parse(e.target.responseText));
-            },
-            onError: function(e) {
-                this._setFailure(true);
-            }
-        }, attempts);
-    },
-    
-    
-    _getResource: function(rq, attempts) {
-        var xhr = new XMLHttpRequest();
-        xhr.addEventListener('load', rq.onLoad.bind(this));
-        xhr.addEventListener('error', function(e) {
-            // Flaky connections might fail fetching resources
-            if (attempts > 1) {
-                this.debounce('_getResource', this._getResource.bind(this, rq, attempts - 1), 200);
-            } else {
-                rq.onError.call(this, e);
-            }
-        }
-        .bind(this));
-        xhr.open('GET', rq.url);
-        xhr.send();
     },
 
 });

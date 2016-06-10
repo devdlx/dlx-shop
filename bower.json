@@ -25,7 +25,8 @@
     "google-castable-video": "GoogleWebComponents/google-castable-video#^1.0.2",
     "google-youtube": "GoogleWebComponents/google-youtube#^1.2.1",
     "material-design-lite": "^1.1.3",
-    "paper-video": "https://github.com/devdlx/paper-video.git#^1.0.2"
+    "paper-video": "https://github.com/devdlx/paper-video.git#^1.0.2",
+    "iron-image": "PolymerElements/iron-image#^1.2.3"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
